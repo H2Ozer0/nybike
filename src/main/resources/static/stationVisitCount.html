@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 引入 echarts.js -->
+    <script src="./js/echarts.min.js"></script>
+    <script src="./js/bmap.js"></script>
+    <script src="./js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=r76uQnkTp3mNx9MSfWkQ5XG4ZO69w7Vd">
+    </script>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 100%;height:500px;"></div>
+</body>
+<!--负责生成div1位置散点图的js代码：stationVisitCount.html中的JS代码-->
+<script type="text/javascript">
+    //服务器接口
+    var stationVisitCountURL = "http://localhost:8080/nybike/operation/findStationVisitCount";
+    //发起AJAX请求
+    $(function () {
+        $.get(stationVisitCountURL,function (result) {
+            if(result.state == 1000){
+                var data = result.data.data;
+                var geoCoordMap = result.data.geoCoordMap;
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('main'));
+                //用于组合data和geoCoordMap两个变量中的数据
+                //转换成散点图所需的数据格式
+                var convertData = function (data) {
+                    var res = [];
+                    for (var i = 0; i < data.length; i++) {
+                        var geoCoord = geoCoordMap[data[i].name];
+                        if (geoCoord) {
+                            res.push({
+                                name: data[i].name,
+                                value: geoCoord.concat(data[i].value)
+                            });
+                        }
+                    }
+                    return res;
+                };
+                option = {
+                    title: {
+                        text: '站点访问次数',
+                        left: 'center'
+                    },
+                    tooltip : {
+                        trigger: 'item'
+                    },
+                    bmap: {
+                        center: [-73.985689, 40.748452],
+                        zoom: 17,
+                        roam: true, // 开启平移和缩放
+                        mapStyle: {
+                            style: 'midnight'
+                        }
+                    },
+                    series : [
+                        {
+                            name: 'visitCount',
+                            type: 'scatter',
+                            coordinateSystem: 'bmap',
+                            data: convertData(data),
+                            symbolSize: function (val) {
+                                return val[2];
+                            },
+                            encode: {
+                                value: 2
+                            },
+                            label: {
+                                formatter: '{b}',
+                                position: 'right',
+                                show: false
+                            },
+                            itemStyle: {
+                                color: 'green'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true
+                                }
+                            }
+                        },
+                        {
+                            name: 'Top 5',
+                            type: 'effectScatter',
+                            coordinateSystem: 'bmap',
+                            data: convertData(data.sort(function (a, b) {
+                                return b.value - a.value;
+                            }).slice(0, 5)),
+                            symbolSize: function (val) {
+                                return val[2] / 10;
+                            },
+                            encode: {
+                                value: 2
+                            },
+                            showEffectOn: 'render',
+                            rippleEffect: {
+                                brushType: 'stroke'
+                            },
+                            hoverAnimation: true,
+                            label: {
+                                formatter: '{b}',
+                                position: 'right',
+                                show: true
+                            },
+                            itemStyle: {
+                                color: 'purple',
+                                shadowBlur: 10,
+                                shadowColor: '#333'
+                            },
+                            zlevel: 1
+                        }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            }else{
+                //异常响应
+                alert(result.msg)
+            }
+        })
+    })
+
+
+</script>
+
+</html>

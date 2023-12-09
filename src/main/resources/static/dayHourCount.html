@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="js/echarts.min.js"></script>
+    <!--引入jquery文件-->
+    <script src="js/jquery-1.11.0.min.js"></script>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 1200px;height:400px;"></div>
+<script type="text/javascript">
+    // 服务器数据接口
+    var dayHourCountUrl="http://localhost:8080/nybike/operation/findDayHourCount";
+    //var dayHourCountUrl="http://39.105.13.214/nybike/operation/findDayHourCount";
+    // jquery提供的页面就绪事件API
+    $(function(){
+        // 发送AJAX请求
+        $.get(dayHourCountUrl,function (result) {
+            // 解析得到的json数据
+            if(result.state==1000){ // 正常响应
+                var vo=result.data;
+                var xData=vo.xdata;
+                var legendData=[]; // 图例所需数据
+                var series=[]; // y轴所需多组数据
+                // 遍历后台发来的yDataMap
+                for(var key in vo.ydataMap){
+                    legendData.push(key); // 填充图例数据
+                    var serie={ // 生成一组y轴数据
+                        name: key,
+                        type: 'line',
+                        data: vo.ydataMap[key]
+                    }
+                    series.push(serie); // 填充到series中
+                }
+
+                // 初始化echarts图表
+                var myChart = echarts.init(document.getElementById('main'));
+
+                option = {
+                    title: {
+                        text: '近3天每天每小时操作数量'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: legendData
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: xData
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: series
+                };
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            }else{ // 异常响应
+                // 弹出异常提示信息
+                alert(result.msg);
+            }
+            console.log(result);  // 输出获取的JSON数据
+            console.log(series);    // 输出x轴数据
+            console.log(vo.yDataMap); // 输出y轴数据的Map
+        });
+    });
+</script>
+</body>
+</html>

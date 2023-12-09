@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>纽约市共享单车</title>
+  <link rel="stylesheet" href="css/page.css">
+  <style type="text/css">
+    html{height:100%}
+    body{height:100%;margin:0px;padding:0px}
+    #container{height:100%}
+  </style>
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=QcIge6VoZG9sUeLScRNHI0OP7RgBqb0G">
+    //v3.0版本的引用方式：src="https://api.map.baidu.com/api?v=3.0&ak=您的密钥"
+  </script>
+  <script type="text/javascript" src="js/test.js"></script>
+  <script type="text/javascript" src="./js/CollectionOperation.js"></script>
+</head>
+
+<body>
+<div id="container"></div>
+<script type="text/javascript">
+  var map = new BMap.Map("container");
+  // 创建地图实例
+  var point = new BMap.Point(-73.985689,40.748452);
+  // 创建点坐标
+  map.centerAndZoom(point, 15);
+  // 初始化地图，设置中心点坐标和地图级别
+  map.addControl(new BMap.NavigationControl());
+  //开启鼠标缩放
+  map.enableScrollWheelZoom(true);
+  //添加标记
+ // var marker =new BMap.Marker(point);
+  //将标记添加到地图中
+  //map.addOverlay(marker);
+  //定义一个控制图标显示的标记变量
+  var isBigIcon = true;
+  //监听事件
+  map.addEventListener("zoomend", function(){
+    //获取地图缩放级别
+    var zoomLevel = map.getZoom();
+    //如果zoomLevl<15，显示小图标
+    if(zoomLevel<15&&isBigIcon == true) {
+      //alert("切换小图标");
+      switchMarker(isBigIcon);
+      isBigIcon = false;
+
+    }
+    //如果zoomLevl<=15，显示大图标
+    if(zoomLevel>=15&&isBigIcon == false) {
+      //alert("切换大图标");
+      switchMarker(isBigIcon);
+      isBigIcon = true;
+
+    }
+  });
+
+  //声明全局变量
+  var bikeLevelMap = new Map();
+  //发送AJAX请求，实时获取站点信息数据
+  //官方站点信息数据的URL
+  // var infoUrl ="https://gbfs.citibikenyc.com/gbfs/en/station_information.json";
+  //获取官方站点状态信息
+  // var statesUrl="https://gbfs.citibikenyc.com/gbfs/en/station_status.json";
+  //后端服务器站点信息数据的URL
+ // var infoUrl ="http://localhost:8080/nybike/realtime/infoData";
+  //获取后端服务器站点状态信息
+ // var statesUrl="http://localhost:8080/nybike/realtime/statusData";
+  //获取云端服务器站点信息
+  var infoUrl ="http://39.105.13.214:8080/nybike/realtime/infoData";
+  //获取云端服务器站点状态信息
+  var statesUrl="http://39.105.13.214:8080/nybike/realtime/statusData";
+  var iconSize = new BMap.Size(38,42);
+  var anchorSize = new BMap.Size(19,42);
+  var imageSize = new BMap.Size(36,40);
+  var iconArray = [
+    new BMap.Icon("./img/bi_0.png",iconSize,{anchor:anchorSize},{imageSize: imageSize}),
+    new BMap.Icon("./img/bi_1.png",iconSize,{anchor:anchorSize},{imageSize: imageSize}),
+    new BMap.Icon("./img/bi_2.png",iconSize,{anchor:anchorSize},{imageSize: imageSize}),
+    new BMap.Icon("./img/bi_3.png",iconSize,{anchor:anchorSize},{imageSize: imageSize}),
+    new BMap.Icon("./img/bi_4.png",iconSize,{anchor:anchorSize},{imageSize: imageSize}),
+    new BMap.Icon("./img/bi_5.png",iconSize,{anchor:anchorSize},{imageSize: imageSize})
+  ];
+
+
+  //声明三类为小图标服务的size对象
+  var smalliconSize = new BMap.Size(14,14);
+  var smallanchorSize = new BMap.Size(17,14);
+  var smallimageSize = new BMap.Size(10,10);
+  //声明一个保存了六种小图片的小图标数组对象
+  var smalliconArray = [
+    new BMap.Icon("./img/si_0.png",smalliconSize,{anchor:smallanchorSize},{imageSize: smallimageSize}),
+    new BMap.Icon("./img/si_1.png",smalliconSize,{anchor:smallanchorSize},{imageSize: smallimageSize}),
+    new BMap.Icon("./img/si_2.png",smalliconSize,{anchor:smallanchorSize},{imageSize: smallimageSize}),
+    new BMap.Icon("./img/si_3.png",smalliconSize,{anchor:smallanchorSize},{imageSize: smallimageSize}),
+    new BMap.Icon("./img/si_4.png",smalliconSize,{anchor:smallanchorSize},{imageSize: smallimageSize}),
+    new BMap.Icon("./img/si_5.png",smalliconSize,{anchor:smallanchorSize},{imageSize: smallimageSize})
+  ];
+  //保存页面中所以marker对象的数组--全局变量
+  var markerArray = [];
+  //声明一个全局map，用于存储共享id-infoData数据
+  var infoWindowDataMap = new Map();
+
+
+  //添加一个Marker方法，传入经纬度
+  function addMarker(lon,lat,id){
+    var point =new BMap.Point(lon,lat);
+    //根据id（key）从Map当中获取
+    var bikeLevel = bikeLevelMap.get(id);
+    //生成一个引入Icon，指向自定义图片
+    // var myIcon = new BMap.Icon("./img/bi_"+bikeLevel+".png", new BMap.Size(38, 42),{
+    //   //指定定位位置
+    //   anchor: new BMap.Size(19, 42)
+    // });
+    // //指定Icon内部图片大小，显示图片
+    // myIcon.imageSize = new BMap.Size(36,40);
+    //根据bikelevel获取iconarray数组中的指定icon
+    var myIcon =iconArray[bikeLevel];
+    var marker = new BMap.Marker(point,{icon:myIcon});
+    //将站点id和marker绑定到一起
+    marker.sid = id;
+    //将marker添加到数组中
+    markerArray.push(marker);
+    //为marker添加一个点击事件
+    marker.addEventListener("click",function (e){
+      var infoWindow = getInfoWindow(id);
+      this.openInfoWindow(infoWindow);
+    })
+    //将标记添加到地图中
+    map.addOverlay(marker);
+  }
+  //添加一个切换图表的方法,isBigIcon控制正在使用的类型
+  function switchMarker(isBigIcon){
+    //遍历所以Marker对象
+    for(var index in markerArray){
+      var marker = markerArray[index];
+      //获取站点的bikeLevel
+      var bikeLevel = bikeLevelMap.get(marker.sid);
+      //大换小
+      if(isBigIcon){
+        marker.setIcon(smalliconArray[bikeLevel]);
+      }else{//小换大
+        marker.setIcon(iconArray[bikeLevel]);
+      }
+    }
+  }
+
+  //基于站点状态计算站点的bikelevel
+  function getBikeLevel(is_renting,is_returning,nba,nea,nda) {
+    //可用车，可用电车，可用桩
+    //如果站点中is_renting||is_returning有一个为0，使用灰色图标表示不可用，图片对应bi_5.png
+    if (is_renting == 0 || is_returning == 0 || (nba + nea + nda) == 0) {
+      return 5;
+    }
+    //如果可用车和可用电车都为0，红色图标表示无车
+    if (nba + nea == 0) {
+      return 0;
+    }
+    //如果（nba+nea）/（nba+nea+nda）<=0.1,橘色表示车极少
+    if ((nba + nea) / (nba + nea + nda) <= 0.1) {
+      return 1;
+    }
+    //如果（nba+nea）/（nba+nea+nda）<=0.5,少绿表示车少
+    if ((nba + nea) / (nba + nea + nda) <= 0.5) {
+      return 2;
+    }
+    //如果（nba+nea）/（nba+nea+nda）>0.5,多绿表示车多
+    if (((nba + nea) / (nba + nea + nda) < 1.0) && ((nba + nea) / (nba + nea + nda) > 0.5)) {
+      return 3;
+    }
+    //如果（nba+nea）/（nba+nea+nda）==1.0,满绿表示车满
+    if ((nba + nea) / (nba + nea + nda) == 1.0) {
+      return 4;
+    }
+  }
+  $.getJSON(statesUrl, function (result) {
+    //打印所有数据
+    //console.log(result)
+    //根据数据，解析到每个站点的id、可用车数量、可用电动车数量、可用桩数量
+    var stationStatus = result.data.stations;
+    //遍历数组
+    for (var index in stationStatus) {
+      var station = stationStatus[index];
+      var id = station.station_id;
+      var nba = station.num_bikes_available;
+      var nea = station.num_ebikes_available;
+      var nda = station.num_docks_available;
+      var isRenting = station.is_renting;
+      var isReturning = station.is_returning;
+      var name = "";
+      var shortName = "";
+      //console.log(id+";"+nba+";"+nea+":"+nda);
+      //计算bikelevel
+      var bikeLevel = getBikeLevel(isRenting, isReturning, nba, nea, nda);
+      //使用Map存储
+      bikeLevelMap.set(id, bikeLevel);
+      //console.log("id="+id+";nba="+nba+";nea="+nea+":nda="+nda+"||bikeLevel="+bikeLevel);
+      //封装infoWindowData对象
+      var infoWindowData = {
+        nba:nba,
+        nea:nea,
+        nda:nda,
+        name:name,
+        shortName:shortName
+      };
+      //将数据存入infoWindowDataMap中
+      infoWindowDataMap.set(id,infoWindowData);
+    }
+    //向此地址请求数据
+    //第一个参数：目标--官方网址，第二个参数收到响应之后执行的数据处理逻辑
+    $.getJSON(infoUrl, function (result) {
+      //console.log(result);
+      //从result中获取到了封装了站点信息的数组--stations
+      var stationInfos = result.data.stations;
+      //遍历数组，获取到所有的经纬度坐标
+      for (var index in stationInfos) {
+        var station = stationInfos[index];
+        //获取经度
+        var lon = station.lon;
+        //获取纬度
+        var lat = station.lat;
+
+        var id = station.station_id;
+        //获取站点名称
+        // var name = station.name;
+        // //获取站点昵称
+        // var shortName = station.short_name;
+        //获取站点的信息窗数据对象
+        var infoWindowData = infoWindowDataMap.get(id);
+        infoWindowData.name = station.name;
+        infoWindowData.shortName = station.short_name;
+        //将站点数据输出到控制台
+        //console.log(lon+";"+lat);
+        //调用addMarker方法
+        addMarker(lon, lat, id);
+      }
+      //启用收集用户信息代码
+      initCollectionOPeration();
+    });
+  })
+
+  //创建获取信息窗对象的方法
+  function getInfoWindow(id){
+    //根据id获取窗口信息窗数据
+    var infoWindowData = infoWindowDataMap.get(id);
+
+    var sContent = "<div class='mapbox-content'>\n" +
+            "\t<div class='mapbox-content-top'>\n" +
+            "\t\t<span class='window_lastUpdate'> 0 ms ago </span>\n" +
+            "\t\t<span class='window_info_button'></span>\n" +
+            "\t</div>\n" +
+            "\t<div class='mapbox-content-header'>\n" +
+            "\t\t<h1 class='mapbox-content-header-stationName'>\n" +
+            "\t\t\t"+infoWindowData.name+" \n" +
+            "\t\t</h1>\n" +
+            "\t</div>\n" +
+            "\t<div class='mapbox-content-detail'>\n" +
+            "\t\t<div class='mapbox-content-detail-bikes-available'>\n" +
+            "\t\t\t<span class='mapbox-content-detail-bikes-available-val'> \n" +
+            "\t\t\t\t"+infoWindowData.nba+" \n" +
+            "\t\t\t</span>\n" +
+            "\t\t\t<span class='mapbox-content-detail-bikes-available-lbl'>Bikes</span>\n" +
+            "\t\t</div>\n" +
+            "\t\t<div class='mapbox-content-detail-docks-available'>\n" +
+            "\t\t\t<span class='mapbox-content-detail-docks-available-val'> \n" +
+            "\t\t\t\t"+infoWindowData.nda+" \n" +
+            "\t\t\t</span>\n" +
+            "\t\t\t<span class='mapbox-content-detail-docks-available-lbl'>Docks</span>\n" +
+            "\t\t</div>\n" +
+            "\t</div>\n" +
+            "\t<div class='mapbox-content-footer'>\n" +
+            "\t\t<span class='mapbox-content-footer-shortName'> \n" +
+            "\t\t\tBike station: "+infoWindowData.shortName+" \n" +
+            "\t\t</span>\n" +
+            "\t</div>\n" +
+            "</div>";
+    //创建信息窗对象
+    var infoWindow = new BMap.InfoWindow(sContent);
+    return infoWindow;
+  }
+
+</script>
+</body>
+</html>

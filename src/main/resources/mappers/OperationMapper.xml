@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--映射文件，需要和接口完全匹配；通过namespace匹配接口文件-->
+<mapper namespace="edu.njnu.nybike.mapper.OperationMapper">
+
+    <!--匹配方法：int insertOperation(Operation operation);-->
+    <!--通过sql语句中的id匹配方法名-->
+    <!--通过#{对象属性名}的形式获取到传输的数据-->
+    <insert id="insertOperation">
+        insert into t_operation(
+          opt_type,station_id,status_level,
+          is_ebike_station,drag_start_lat,
+          drag_start_lon,drag_end_lat,
+          drag_end_lon,zoom_start_level,
+          zoom_end_level,icon_type,
+          user_ip,created_time
+        )values (
+            #{optType},#{stationId},
+            #{statusLevel},#{isEbikeStation},
+            #{dragStartLat},#{dragStartLon},
+            #{dragEndLat},#{dragEndLon},
+            #{zoomStartLevel},#{zoomEndLevel},
+            #{iconType},#{userIp},
+            #{createdTime}
+        )
+    </insert>
+    <select id="listOptTypeCount"
+            resultType="edu.njnu.nybike.pojo.dto.OptTypeCountDTO">
+        select opt_type as optType,count(*) as count
+        from
+            t_operation
+        group by
+        opt_type
+    </select>
+    <select id="listZoomEndLevelCount"
+            resultType="edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO">
+        select zoom_end_level as zoomEndLevel,count(*) as count
+        from
+            t_operation
+        group by
+            zoom_end_level
+        order by
+            zoom_end_level asc
+    </select>
+
+    <select id="listDayHourCount" resultType="edu.njnu.nybike.pojo.dto.DayHourCountDTO">
+        <![CDATA[
+            SELECT
+                DATE(created_time) AS day,
+                DATE_FORMAT(created_time, '%H') AS hour,
+                COUNT(*) AS count
+            FROM t_operation
+            WHERE created_time > DATE_SUB(CURDATE(), INTERVAL 2 DAY)
+              AND created_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            GROUP BY day, hour
+            ORDER BY day, hour;
+            ]]>
+    </select>
+    <select id="getStationInfoById" resultType="edu.njnu.nybike.pojo.entity.StationInfo">
+            select * from t_station_info where id = #{sid}
+    </select>
+    <select id="listStationInfoIds" resultType="java.lang.String">
+        select id from t_station_info
+    </select>
+    <!--涉及到传递的参数为集合，所以需要动态sql标签遍历集合-->
+    <insert id="insertStationInfos" >
+        insert into t_station_info(id,name,lat,lon)
+        values
+        <foreach collection="stationInfos" item="stationInfo" separator=",">
+            (#{stationInfo.id},#{stationInfo.name},#{stationInfo.lat},#{stationInfo.lon})
+        </foreach>
+    </insert>
+<!-- PieItemVO属性类型不确定，要手动指定，避免由于自动封装导致类型不匹配的问题   -->
+    <resultMap id="rm" type="edu.njnu.nybike.pojo.vo.PieItemVO">
+        <result column="name" property="name" jdbcType="VARCHAR" javaType="string"></result>
+        <result column="value" property="value" jdbcType="INTEGER" javaType="int"></result>
+    </resultMap>
+    <select id="listStationVisitCount" resultMap="rm">
+        select tsi.name as name,tsv.value as value
+        from
+            t_station_info as tsi
+            join
+            (select
+                station_id,count(*) as value
+            from
+                t_operation
+            where opt_type=1
+            group by station_id
+            )tsv
+        on tsi.id=tsv.station_id;
+    </select>
+    <select id="listStationInfo" resultType="edu.njnu.nybike.pojo.entity.StationInfo" >
+        select * from t_station_info where name in
+        <foreach collection="names" item="name" separator="," open="(" close=")">
+            #{name}
+        </foreach>
+
+    </select>
+</mapper>

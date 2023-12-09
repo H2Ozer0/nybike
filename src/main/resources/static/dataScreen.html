@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>用户操作类型以及操作次数图</title>
+  <!-- 引入刚刚下载的 ECharts 文件 -->
+  <script src="./js/echarts.min.js"></script>
+  <script src="./js/jquery-1.11.0.min.js"></script>
+  <script src="./js/bmap.js"></script>
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=r76uQnkTp3mNx9MSfWkQ5XG4ZO69w7Vd"></script>
+</head>
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .box {
+      display: flex;
+    }
+
+    /*  */
+    .picMap {
+      width: 40%;
+    }
+
+    .dataMapArea {
+      width: 60%;
+    }
+
+    .dataMapArea .row {
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dataMapArea .row .d1 {
+      width: 100%;
+      height: 100%;
+    }
+
+    .dataMapArea .row:nth-child(1) .d1 {
+      width: 50%;
+    }
+    .box{
+    	border:0.5px solid black;
+    }
+    .picMap{
+    	border-right: 0.5px solid black;
+    }
+    .pic1{
+    	border-right: 0.5px solid black;
+    }
+    .pic3{
+    	border-top: 0.5px solid black;
+    }
+  </style>
+<body>
+  <div class="box" id="box">
+    <div class="picMap" id="div1">div1</div>
+    <div class="dataMapArea" id="dataMapArea">
+      <div class="row">
+        <div class="pic1 d1" id="div2">div2</div>
+        <div class="pic2 d1" id="div3">div3</div>
+      </div>
+      <div class="row">
+        <div class="pic3 d1" id="div4">div4</div>
+      </div>
+    </div>
+  </div>
+  <!-- 负责动态指定div宽高的js代码 -->
+  <script>
+    //窗口的宽度和高度
+    var viewWidth = window.innerWidth-2;
+    var viewHeight = window.innerHeight-1.5;
+
+    //让box的宽度高度等于窗口的宽度和高度
+    var box = document.getElementById('box');
+    box.style.width = `${viewWidth}px`;
+    box.style.height = `${viewHeight}px`;
+
+    //左侧地图区域 高度等于窗口高度
+    var picMap = document.getElementById('div1');
+    picMap.style.height = `${viewHeight}px`;
+
+    //右侧2行高度是窗口高度的一半
+    var dataMaps = document.querySelectorAll('.row');
+    dataMaps[0].style.height = `${viewHeight/2}px`;
+    dataMaps[1].style.height = `${viewHeight/2}px`;
+
+    //窗口变化大小也变化
+    
+    window.onresize = function () {
+      var viewWidth = window.innerWidth-2;
+      var viewHeight = window.innerHeight-1.5;
+
+      var box = document.getElementById('box');
+      box.style.width = `${viewWidth}px`;
+      box.style.height = `${viewHeight}px`;
+
+      var picMap = document.getElementById('div1');
+      picMap.style.height = `${viewHeight}px`;
+
+      var dataMaps = document.querySelectorAll('.row');
+      dataMaps[0].style.height = `${viewHeight/2}px`;
+      dataMaps[1].style.height = `${viewHeight/2}px`;
+    }
+  </script>
+  <!--负责生成div1位置散点图的js代码：stationVisitCount.html中的JS代码-->
+  <script type="text/javascript">
+    //服务器接口
+    //var stationVisitCountURL = "http://localhost:8080/nybike/operation/findStationVisitCount";
+    var stationVisitCountURL = "http://39.105.13.214:8080/nybike/operation/findStationVisitCount";
+    //发起AJAX请求
+    $(function () {
+      $.get(stationVisitCountURL,function (result) {
+        if(result.state == 1000){
+          var data = result.data.data;
+          var geoCoordMap = result.data.geoCoordMap;
+          // 基于准备好的dom，初始化echarts实例
+          var myChart = echarts.init(document.getElementById('div1'));
+          //用于组合data和geoCoordMap两个变量中的数据
+          //转换成散点图所需的数据格式
+          var convertData = function (data) {
+            var res = [];
+            for (var i = 0; i < data.length; i++) {
+              var geoCoord = geoCoordMap[data[i].name];
+              if (geoCoord) {
+                res.push({
+                  name: data[i].name,
+                  value: geoCoord.concat(data[i].value)
+                });
+              }
+            }
+            return res;
+          };
+          option = {
+            title: {
+              text: '站点访问次数',
+              left: 'center'
+            },
+            tooltip : {
+              trigger: 'item'
+            },
+            bmap: {
+              center: [-73.985689, 40.748452],
+              zoom: 17,
+              roam: true, // 开启平移和缩放
+              mapStyle: {
+                style: 'midnight'
+              }
+            },
+            series : [
+              {
+                name: 'visitCount',
+                type: 'scatter',
+                coordinateSystem: 'bmap',
+                data: convertData(data),
+                symbolSize: function (val) {
+                  return val[2];
+                },
+                encode: {
+                  value: 2
+                },
+                label: {
+                  formatter: '{b}',
+                  position: 'right',
+                  show: false
+                },
+                itemStyle: {
+                  color: 'green'
+                },
+                emphasis: {
+                  label: {
+                    show: true
+                  }
+                }
+              },
+              {
+                name: 'Top 5',
+                type: 'effectScatter',
+                coordinateSystem: 'bmap',
+                data: convertData(data.sort(function (a, b) {
+                  return b.value - a.value;
+                }).slice(0, 5)),
+                symbolSize: function (val) {
+                  return val[2] / 10;
+                },
+                encode: {
+                  value: 2
+                },
+                showEffectOn: 'render',
+                rippleEffect: {
+                  brushType: 'stroke'
+                },
+                hoverAnimation: true,
+                label: {
+                  formatter: '{b}',
+                  position: 'right',
+                  show: true
+                },
+                itemStyle: {
+                  color: 'purple',
+                  shadowBlur: 10,
+                  shadowColor: '#333'
+                },
+                zlevel: 1
+              }
+            ]
+          };
+          // 使用刚指定的配置项和数据显示图表。
+          myChart.setOption(option);
+        }else{
+          //异常响应
+          alert(result.msg)
+        }
+      })
+    })
+
+
+  </script>
+  <script type="text/javascript">
+    /*服务器接口*/
+   // var optTypeCountURL = "http://localhost:8080/nybike/operation/findOptTypeCount";
+    var optTypeCountURL = "http://39.105.13.214:8080/nybike/operation/findOptTypeCount";
+    //页面就绪事件
+    $(function () {
+      //    发送AJAX请求
+      $.get(optTypeCountURL,function (result) {
+        //    判断响应成功，然后解析结果数据
+        if(result.state == 1000){
+          var pieDatas = result.data;
+          var legendData = [];
+          //    基于饼图数据，生成图例数据
+          for (var index in pieDatas){
+            legendData.push(pieDatas[index].name);
+          }
+          var myChart = echarts.init(document.getElementById('div2'));
+          var option = {
+            title: {
+              text: '地图各类操作类型数量统计',
+              subtext: '真实记录',
+              left: 'center'
+            },
+            tooltip: {
+              trigger: 'item',
+              formatter: '{a} <br/> {b}:{c} ({d}%)'
+            },
+            legend: {
+              orient: 'vertical',
+              left: 'left',
+              //图例数据使用获取到的动态数据
+              data: legendData
+            },
+            series: [
+              {
+                name: '操作类型',
+                type: 'pie',
+                radius: '50%',
+                center: ['50%','60%'],
+                //饼图数据使用获取到动态数据
+                data: pieDatas,
+                roseType: 'area'
+              }
+            ]
+          };
+          myChart.setOption(option);
+        }else{
+          //    弹出异常信息
+          alert(result.msg)
+        }
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    // 服务器数据接口
+   // var zoomEndLevelCountUrl="http://localhost:8080/nybike/operation/findZoomEndLevelCount";
+    var zoomEndLevelCountUrl="http://39.105.13.214:8080/nybike/operation/findZoomEndLevelCount";
+    // jquery提供的页面就绪事件API
+    $(function(){
+      // 发送AJAX请求
+      $.get(zoomEndLevelCountUrl,function (result) {
+        // 解析得到的json数据
+        if(result.state==1000){ // 正常响应
+          var xData=result.data.xdata; // 获取后台返回的x轴数据
+          var yDataMap=result.data.ydataMap; // 获取后台返回的y轴数据的Map集合
+          var legendData=[]; // 保存图例数据
+          var seriesData=[]; // 保存所有y轴数据
+          //换了种写法
+          // for(var key in yDataMap){ // 遍历Map集合
+          //     legendData.push(key);
+          //     var yData={
+          //         name: key,
+          //         type: 'bar',
+          //         data: yDataMap[key]
+          //     };
+          //     seriesData.push(yData);
+          // }
+          var mapkey=[];
+          var mapData=[];
+          for(var key in yDataMap){
+            mapkey.push(key);
+            mapData.push(yDataMap[key]);
+          }
+
+          var yData={
+            name: "操作次数",
+            type: 'bar',
+            data: mapData
+          };
+          seriesData.push(yData);
+          // 基于准备好的dom，初始化echarts实例
+          var myChart = echarts.init(document.getElementById('div3'));
+          // 指定图表的配置项和数据 var opts={}
+          option = {
+            title: {
+              text: '所有用户各个缩放级别的次数'
+            },
+            legend: {
+              data:legendData
+            },
+            tooltip: {},
+            xAxis: {
+              type: 'category',
+              data: xData
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: seriesData
+          };
+
+          // 使用刚指定的配置项和数据显示图表。
+          myChart.setOption(option);
+        }else{ // 异常响应
+          // 弹出异常提示信息
+          alert(result.msg);
+        }
+        //console.log(result);  // 输出获取的JSON数据
+        // console.log(seriesData);    // 输出x轴数据
+        // console.log(yDataMap); // 输出y轴数据的Map
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    // 服务器数据接口
+    //var dayHourCountUrl="http://localhost:8080/nybike/operation/findDayHourCount";
+    var dayHourCountUrl="http://39.105.13.214:8080/nybike/operation/findDayHourCount";
+    // jquery提供的页面就绪事件API
+    $(function(){
+      // 发送AJAX请求
+      $.get(dayHourCountUrl,function (result) {
+        // 解析得到的json数据
+        if(result.state==1000){ // 正常响应
+          var vo=result.data;
+          var xData=vo.xdata;
+          var legendData=[]; // 图例所需数据
+          var series=[]; // y轴所需多组数据
+          // 遍历后台发来的yDataMap
+          for(var key in vo.ydataMap){
+            legendData.push(key); // 填充图例数据
+            var serie={ // 生成一组y轴数据
+              name: key,
+              type: 'line',
+              data: vo.ydataMap[key]
+            }
+            series.push(serie); // 填充到series中
+          }
+
+          // 初始化echarts图表
+          var myChart = echarts.init(document.getElementById('div4'));
+
+          option = {
+            title: {
+              text: '近3天每天每小时操作数量'
+            },
+            tooltip: {
+              trigger: 'axis'
+            },
+            legend: {
+              data: legendData
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+            },
+            toolbox: {
+              feature: {
+                saveAsImage: {}
+              }
+            },
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              data: xData
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: series
+          };
+
+          // 使用刚指定的配置项和数据显示图表。
+          myChart.setOption(option);
+        }else{ // 异常响应
+          // 弹出异常提示信息
+          alert(result.msg);
+        }
+        // console.log(result);  // 输出获取的JSON数据
+        // console.log(series);    // 输出x轴数据
+        // console.log(vo.yDataMap); // 输出y轴数据的Map
+      });
+    });
+  </script>
+</body>
+
+</html>
