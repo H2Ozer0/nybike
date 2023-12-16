@@ -37,4 +37,5 @@ public interface OperationMapper{
      * @return
      */
     List<EndStationCountDTO> listEndStationCount();
+    StationInfo getGeoCoordByEndStationName(String endStationName);
 }
