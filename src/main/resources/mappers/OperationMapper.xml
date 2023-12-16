@@ -98,4 +98,8 @@
         </foreach>
 
     </select>
+<!--    List<EndStationCountDTO> listEndStationCount();-->
+<!--    sql语句返回的结果集字段名和对象中的属性名一致-->
+    <select id="listEndStationCount"
+            resultMap="edu.njnu.nybike.pojo.dto."
 </mapper>

@@ -1,6 +1,7 @@
 package edu.njnu.nybike.mapper;
 
 import edu.njnu.nybike.pojo.dto.DayHourCountDTO;
+import edu.njnu.nybike.pojo.dto.EndStationCountDTO;
 import edu.njnu.nybike.pojo.dto.OptTypeCountDTO;
 import edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO;
 import edu.njnu.nybike.pojo.entity.Operation;
@@ -31,4 +32,9 @@ public interface OperationMapper{
     List<PieItemVO<String,Integer>> listStationVisitCount();
     //基于站点名称的数组查询站点数据,返回名称-经纬度对应关系
     List<StationInfo> listStationInfo(List<String> names);
+    /**
+     * 查询各个站点的作为终点的次数
+     * @return
+     */
+    List<EndStationCountDTO> listEndStationCount();
 }
