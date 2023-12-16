@@ -60,7 +60,6 @@ public class OperationServiceImpl  implements IOperationService {
     public BarItemVO findZoomEndLevelCount() {
         List<ZoomEndLevelCountDTO> zoomEndLeveCountDTOList = operationMapper.listZoomEndLevelCount();
         BarItemVO barItemVO = new BarItemVO();
-        ;
         Map<Integer, Integer> yDataMap = new HashMap<>();
         //因为14.4和14在加入Integer列表时会被算作两个14，所以用Set来防止重复值被加入数组，
         Set<Integer> set = new HashSet<>();
