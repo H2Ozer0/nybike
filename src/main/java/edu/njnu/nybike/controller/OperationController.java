@@ -49,8 +49,7 @@ public class OperationController {
         return  JsonResult.getSuccessJR(operationService.findStationVisitCount());
     }
     @GetMapping("/findEndStationCount")
-    public JsonResult<List<MapScatterVO>> findEndStationCount(){
-        List<MapScatterVO> mapScatterVOList=operationService.findEndStationCount();
-        return JsonResult.getSuccessJR(mapScatterVOList);
+    public JsonResult <MapScatterVO> findEndStationCount(){
+        return JsonResult.getSuccessJR(operationService.findEndStationCount());
     }
 }

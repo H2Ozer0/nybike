@@ -26,6 +26,6 @@ public interface IOperationService {
      * 站点作为终点的次数
      * @return 散点图所需要的对象集合
      */
-    List<MapScatterVO> findEndStationCount();
+    MapScatterVO findEndStationCount();
 
 }

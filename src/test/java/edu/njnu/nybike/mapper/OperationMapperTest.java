@@ -1,13 +1,9 @@
 package edu.njnu.nybike.mapper;
 
-import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
-import edu.njnu.nybike.IOperationService;
-import edu.njnu.nybike.pojo.dto.EndStationCountDTO;
 import edu.njnu.nybike.pojo.dto.OptTypeCountDTO;
 import edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO;
 import edu.njnu.nybike.pojo.entity.Operation;
 import edu.njnu.nybike.pojo.vo.PieItemVO;
-import edu.njnu.nybike.service.impl.OperationServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,8 +53,8 @@ public class OperationMapperTest {
     }
     @Test
     public void listEndStationCount(){
-        List<EndStationCountDTO> endStationCountDTOS=operationMapper.listEndStationCount();
+        List<PieItemVO<String, Integer>> endStationCountDTOS=operationMapper.listEndStationCount();
         endStationCountDTOS.forEach(item-> System.out.println("EndStationName: " +
-                item.getEndStationName() + ", Count: " + item.getCount()));
+                item.getName() + ", Count: " + item.getValue()));
     }
 }

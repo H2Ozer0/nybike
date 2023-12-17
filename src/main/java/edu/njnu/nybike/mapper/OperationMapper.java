@@ -1,7 +1,6 @@
 package edu.njnu.nybike.mapper;
 
 import edu.njnu.nybike.pojo.dto.DayHourCountDTO;
-import edu.njnu.nybike.pojo.dto.EndStationCountDTO;
 import edu.njnu.nybike.pojo.dto.OptTypeCountDTO;
 import edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO;
 import edu.njnu.nybike.pojo.entity.Operation;
@@ -36,6 +35,6 @@ public interface OperationMapper{
      * 查询各个站点的作为终点的次数
      * @return
      */
-    List<EndStationCountDTO> listEndStationCount();
-    StationInfo getGeoCoordByEndStationName(String endStationName);
+    List<PieItemVO<String,Integer>> listEndStationCount();
+//    StationInfo getGeoCoordByEndStationName(String endStationName);
 }

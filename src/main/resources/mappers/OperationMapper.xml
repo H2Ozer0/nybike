@@ -100,23 +100,15 @@
     </select>
 <!--    List<EndStationCountDTO> listEndStationCount();-->
 <!--    sql语句返回的结果集字段名和对象中的属性名一致-->
-    <resultMap id="EndStationCountResultMap" type="edu.njnu.nybike.pojo.dto.EndStationCountDTO">
-        <result property="EndStationName" column="end_station_name" />
-        <result property="count" column="count" />
-    </resultMap>
 
     <select id="listEndStationCount"
-            resultMap="EndStationCountResultMap">
+            resultMap="rm">
         select
-            end_station_name as EndStationName,endstationcount as count
+            end_station_name as name,endstationcount as value
         from
             end_station
     </select>
-    <select id="getGeoCoordByEndStationName" resultType="edu.njnu.nybike.pojo.entity.StationInfo">
-        SELECT end_station_latitude as lat, end_station_longitude as lon
-        FROM end_station
-        WHERE end_station_name = #{endStationName}
-    </select>
+
 </mapper>
 
 

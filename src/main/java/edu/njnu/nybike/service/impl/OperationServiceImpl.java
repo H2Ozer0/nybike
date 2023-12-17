@@ -5,14 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.cj.log.Log;
 import edu.njnu.nybike.IOperationService;
 import edu.njnu.nybike.exception.EntityArgException;
 import edu.njnu.nybike.exception.InsertException;
 import edu.njnu.nybike.listener.MySCListener;
 import edu.njnu.nybike.mapper.OperationMapper;
 import edu.njnu.nybike.pojo.dto.DayHourCountDTO;
-import edu.njnu.nybike.pojo.dto.EndStationCountDTO;
 import edu.njnu.nybike.pojo.dto.OptTypeCountDTO;
 import edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO;
 import edu.njnu.nybike.pojo.entity.Operation;
@@ -240,31 +238,22 @@ public class OperationServiceImpl  implements IOperationService {
         return mapScatterVO;
     }
     @Override
-    public List<MapScatterVO> findEndStationCount() {
-        List<EndStationCountDTO> endStationCounts = operationMapper.listEndStationCount();
-        List<MapScatterVO> mapScatterVOList = new ArrayList<>();
-
-        for (EndStationCountDTO endStationCount : endStationCounts) {
-            MapScatterVO mapScatterVO = new MapScatterVO();
-
-            PieItemVO<String, Integer> pieItemVO = new PieItemVO<>();
-            pieItemVO.setName(endStationCount.getEndStationName());
-            pieItemVO.setValue(endStationCount.getCount());
-
-            mapScatterVO.setData(Collections.singletonList(pieItemVO));
-
-            // 直接调用数据库层面的方法获取经纬度信息
-            StationInfo stationInfo = operationMapper.getGeoCoordByEndStationName(endStationCount.getEndStationName());
-
-            if (stationInfo != null) {
-                Double[] coord = {stationInfo.getLon(), stationInfo.getLat()};
-                Map<String, Double[]> geoCoordMap = Collections.singletonMap(endStationCount.getEndStationName(), coord);
-                mapScatterVO.setGeoCoordMap(geoCoordMap);
-                mapScatterVOList.add(mapScatterVO);
-            }
+    public MapScatterVO findEndStationCount() {
+        List<PieItemVO<String,Integer>> pieItemVOS = operationMapper.listEndStationCount();
+        List<String> names= new ArrayList<>();
+        for(PieItemVO<String,Integer> pieItemVO:pieItemVOS){
+            names.add(pieItemVO.getName());
         }
-
-        return mapScatterVOList;
+        List<StationInfo> stationInfoList=operationMapper.listStationInfo(names);
+        Map<String,Double[]> geoCoordMap=new HashMap<>();
+        for(StationInfo stationInfo:stationInfoList){
+            Double[] coord={stationInfo.getLon(),stationInfo.getLat()};
+            geoCoordMap.put(stationInfo.getName(),coord);
+        }
+        MapScatterVO mapScatterVO=new MapScatterVO();
+        mapScatterVO.setData(pieItemVOS);
+        mapScatterVO.setGeoCoordMap(geoCoordMap);
+        return mapScatterVO;
     }
 
 }
