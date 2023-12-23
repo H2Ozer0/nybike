@@ -6,12 +6,54 @@
     <!-- 引入刚刚下载的 ECharts 文件 -->
     <script src="./js/jquery-1.11.0.min.js"></script>
     <script src="./js/echarts.min.js"></script>
+    <style>
+        /* Style for the navigation bar */
+        nav {
+            background-color: #333;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
 
+        /* Style for the navigation bar links */
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        /* Style for the navigation bar links on hover */
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Give some margin to the content below the navigation bar */
+        body {
+            margin-top: 48px; /* Adjust as needed based on your navigation bar height */
+        }
+
+    </style>
 </head>
 <body style="background-color: #2a2a2a; color: #ffffff;">
 <!-- 两个容器用于放置 ECharts 图表 -->
-<div id="main" style="width: 100%;height:700px;"></div>
+<div id="main" style="width: 100%;height:650px;"></div>
+<nav>
+    <a href="http://localhost:8080/nybike/DailyHourlyareaChart.html">每天每小时骑行次数堆叠图</a>
+    <a href="http://localhost:8080/nybike/DailyHourlyheatmapChart.html">每天每小时骑行次数热力图</a>
+    <a href="http://localhost:8080/nybike/DailyHourlylineChart.html">每天每小时骑行次数折线图</a>
+    <a href="http://localhost:8080/nybike/Datebarplus.html">24h动态柱形图</a>
+    <a href="http://localhost:8080/nybike/DayRideCalender.html">每天骑行次数日历图</a>
+    <a href="http://localhost:8080/nybike/pieChart.html">客户分析饼图</a>
+    <a href="http://localhost:8080/nybike/scatterEndStation.html">骑行终点散点图</a>
+    <a href="http://localhost:8080/nybike/stationLine.html">骑行路线图</a>
 
+</nav>
 
 <script type="text/javascript">
     /*服务器接口*/
@@ -22,7 +64,7 @@
         $.get(gdenerRideCountURL,function (result) {
             //    判断响应成功，然后解析结果数据
             if(result.state == 1000){
-                var myChart = echarts.init(document.getElementById('main'));
+                var myChart = echarts.init(document.getElementById('main'),'dark');
                 // 转换数据格式
                 const graphData = result.data.map(item => [
                     item.name.substring(0, 10), // 保留日期部分
@@ -39,7 +81,7 @@
                 links.pop();
                 option = {
                     // 设置背景色为白色
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'black',
                     tooltip: {
                         position: 'top'
                     },

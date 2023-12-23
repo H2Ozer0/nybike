@@ -5,9 +5,55 @@
   <title>ECharts</title>
   <script src="js/echarts.min.js"></script>
   <script src="js/jquery-1.11.0.min.js"></script>
+  <style>
+    /* Style for the navigation bar */
+    nav {
+      background-color: #333;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+
+    /* Style for the navigation bar links */
+    nav a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    /* Style for the navigation bar links on hover */
+    nav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    /* Give some margin to the content below the navigation bar */
+    body {
+      margin-top: 48px; /* Adjust as needed based on your navigation bar height */
+    }
+
+  </style>
 </head>
+
 <body>
-<div id="areaChart" style="width: 800px; height: 600px;"></div>
+<div id="areaChart" style="width:100%; height: 650px;"></div>
+<!-- Navigation bar -->
+<nav>
+  <a href="http://localhost:8080/nybike/DailyHourlyareaChart.html">每天每小时骑行次数堆叠图</a>
+  <a href="http://localhost:8080/nybike/DailyHourlyheatmapChart.html">每天每小时骑行次数热力图</a>
+  <a href="http://localhost:8080/nybike/DailyHourlylineChart.html">每天每小时骑行次数折线图</a>
+  <a href="http://localhost:8080/nybike/Datebarplus.html">24h动态柱形图</a>
+  <a href="http://localhost:8080/nybike/DayRideCalender.html">每天骑行次数日历图</a>
+  <a href="http://localhost:8080/nybike/pieChart.html">客户分析饼图</a>
+  <a href="http://localhost:8080/nybike/scatterEndStation.html">骑行终点散点图</a>
+  <a href="http://localhost:8080/nybike/stationLine.html">骑行路线图</a>
+
+</nav>
 
 <script type="text/javascript">
   var dayHourCountBaseUrl = "http://localhost:8080/nybike/operation/getDailyHourlyCount";
@@ -32,12 +78,13 @@
 
   function renderChart(xAxisData, yDataMap) {
     // 使用ECharts绘制堆叠区域图
-    var chart = echarts.init(document.getElementById('areaChart'));
+    var chart = echarts.init(document.getElementById('areaChart'),'dark');
 
     // 配置项
     var option = {
       title: {
-        text: '每天每小时的次数堆叠区域图'
+        text: '每天每小时的次数堆叠区域图',
+        left: 'left'
       },
       tooltip: {
         trigger: 'axis',
@@ -46,7 +93,8 @@
         }
       },
       legend: {
-        data: Object.keys(yDataMap)
+        data: Object.keys(yDataMap),
+        top:30
       },
       xAxis: {
         type: 'category',
