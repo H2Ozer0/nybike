@@ -98,6 +98,48 @@
         </foreach>
 
     </select>
+    <select id="listGenderRideCount"
+            resultType="edu.njnu.nybike.pojo.dto.GenderRideCountDTO">
+        select gender as genderType,ride_count as rideCount
+        from
+            gender_statistics
+    </select>
+    <select id="listGenderRideAvg"
+            resultType="edu.njnu.nybike.pojo.dto.GenderRideAvgDTO">
+        select gender as genderType,average_duration as rideAvg
+        from
+            gender_statistics
+    </select>
+    <select id="listSubscriberAge"
+            resultType="edu.njnu.nybike.pojo.dto.SubscriberAgeDTO">
+        select age_group as age,ride_count as count
+        from
+            age_group_data_subscriber
+    </select>
+    <select id="listCustomerAge"
+            resultType="edu.njnu.nybike.pojo.dto.CustomerAgeDTO">
+        select age_group as age,ride_count as count
+        from
+            age_group_data_customer
+    </select>
+    <select id="listStationLine"
+            resultType="edu.njnu.nybike.pojo.dto.StationLineDTO">
+        select start_latitude as startLatitude,start_longitude as startLongitude,end_latitude as endLatitude,end_longitude as endLongitude
+        from
+            route_data
+    </select>
+    <select id="listDayRideCount"
+            resultType="edu.njnu.nybike.pojo.dto.DayRideCountDTO">
+        SELECT
+            CAST(starttime AS DATE) AS date,
+    COUNT(*) AS count
+        FROM
+            trip_data
+        GROUP BY
+            date
+        ORDER BY
+            date;
+    </select>
 <!--    List<EndStationCountDTO> listEndStationCount();-->
 <!--    sql语句返回的结果集字段名和对象中的属性名一致-->
 
@@ -108,7 +150,48 @@
         from
             end_station
     </select>
-
+    <select id="listGenderRideCount"
+            resultType="edu.njnu.nybike.pojo.dto.GenderRideCountDTO">
+        select gender as genderType,ride_count as rideCount
+        from
+            gender_statistics
+    </select>
+    <select id="listGenderRideAvg"
+            resultType="edu.njnu.nybike.pojo.dto.GenderRideAvgDTO">
+        select gender as genderType,average_duration as rideAvg
+        from
+            gender_statistics
+    </select>
+    <select id="listSubscriberAge"
+            resultType="edu.njnu.nybike.pojo.dto.SubscriberAgeDTO">
+        select age_group as age,ride_count as count
+        from
+            age_group_data_subscriber
+    </select>
+    <select id="listCustomerAge"
+            resultType="edu.njnu.nybike.pojo.dto.CustomerAgeDTO">
+        select age_group as age,ride_count as count
+        from
+            age_group_data_customer
+    </select>
+    <select id="listStationLine"
+            resultType="edu.njnu.nybike.pojo.dto.StationLineDTO">
+        select start_latitude as startLatitude,start_longitude as startLongitude,end_latitude as endLatitude,end_longitude as endLongitude
+        from
+            route_data
+    </select>
+    <select id="listDayRideCount"
+            resultType="edu.njnu.nybike.pojo.dto.DayRideCountDTO">
+        SELECT
+            CAST(starttime AS DATE) AS date,
+    COUNT(*) AS count
+        FROM
+            trip_data
+        GROUP BY
+            date
+        ORDER BY
+            date;
+    </select>
 </mapper>
 
 

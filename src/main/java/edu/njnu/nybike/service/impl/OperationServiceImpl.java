@@ -10,15 +10,10 @@ import edu.njnu.nybike.exception.EntityArgException;
 import edu.njnu.nybike.exception.InsertException;
 import edu.njnu.nybike.listener.MySCListener;
 import edu.njnu.nybike.mapper.OperationMapper;
-import edu.njnu.nybike.pojo.dto.DayHourCountDTO;
-import edu.njnu.nybike.pojo.dto.OptTypeCountDTO;
-import edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO;
+import edu.njnu.nybike.pojo.dto.*;
 import edu.njnu.nybike.pojo.entity.Operation;
 import edu.njnu.nybike.pojo.entity.StationInfo;
-import edu.njnu.nybike.pojo.vo.BarItemVO;
-import edu.njnu.nybike.pojo.vo.LineItemVO;
-import edu.njnu.nybike.pojo.vo.MapScatterVO;
-import edu.njnu.nybike.pojo.vo.PieItemVO;
+import edu.njnu.nybike.pojo.vo.*;
 import edu.njnu.nybike.util.IPUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -254,6 +249,85 @@ public class OperationServiceImpl  implements IOperationService {
         mapScatterVO.setData(pieItemVOS);
         mapScatterVO.setGeoCoordMap(geoCoordMap);
         return mapScatterVO;
+    }
+    String [] genderTypeName = {"未知","男性","女性"};
+    @Override
+    public List<PieItemVO<String,Integer>> findGenderRideCount(){
+        List<GenderRideCountDTO> genderRideCountDTOList=operationMapper.listGenderRideCount();
+        List<PieItemVO<String,Integer>> pieItemVOList=new ArrayList<>(genderRideCountDTOList.size());
+        for(GenderRideCountDTO genderRideCountDTO:genderRideCountDTOList){
+            PieItemVO<String,Integer> pieItemVO = new PieItemVO();
+            pieItemVO.setName(genderTypeName[genderRideCountDTO.getGenderType()]);
+            pieItemVO.setValue(genderRideCountDTO.getRideCount());
+            pieItemVOList.add(pieItemVO);
+
+        }
+        return pieItemVOList;
+    }
+    @Override
+    public List<PieItemVO<String,Integer>> findGenderRideAvg(){
+        List<GenderRideAvgDTO> genderRideAvgDTOList=operationMapper.listGenderRideAvg();
+        List<PieItemVO<String,Integer>> pieItemVOList=new ArrayList<>(genderRideAvgDTOList.size());
+        for(GenderRideAvgDTO genderRideAvgDTO:genderRideAvgDTOList){
+            PieItemVO<String,Integer> pieItemVO = new PieItemVO();
+            pieItemVO.setName(genderTypeName[genderRideAvgDTO.getGenderType()]);
+            pieItemVO.setValue(genderRideAvgDTO.getRideAvg());
+            pieItemVOList.add(pieItemVO);
+
+        }
+        return pieItemVOList;
+    }
+    @Override
+    public List<PieItemVO<Integer,Integer>> findSubscriberAge(){
+        List<SubscriberAgeDTO> subscriberAgeDTOList= operationMapper.listSubscriberAge();
+        List<PieItemVO<Integer,Integer>> pieItemVOList=new ArrayList<>(subscriberAgeDTOList.size());
+        for(SubscriberAgeDTO subscriberAgeDTO:subscriberAgeDTOList){
+            PieItemVO<Integer,Integer> pieItemVO = new PieItemVO<>();
+            pieItemVO.setName(subscriberAgeDTO.getAge());
+            pieItemVO.setValue(subscriberAgeDTO.getCount());
+            pieItemVOList.add(pieItemVO);
+        }
+        return pieItemVOList;
+    }
+    @Override
+    public List<PieItemVO<Integer,Integer>> findCustomerAge(){
+        List<CustomerAgeDTO> customerAgeDTOList= operationMapper.listCustomerAge();
+        List<PieItemVO<Integer,Integer>> pieItemVOList=new ArrayList<>(customerAgeDTOList.size());
+        for(CustomerAgeDTO customerAgeDTO:customerAgeDTOList){
+            PieItemVO<Integer,Integer> pieItemVO = new PieItemVO<>();
+            pieItemVO.setName(customerAgeDTO.getAge());
+            pieItemVO.setValue(customerAgeDTO.getCount());
+            pieItemVOList.add(pieItemVO);
+        }
+        return pieItemVOList;
+    }
+    @Override
+    public List<RouteLineVO> findStationLine(){
+        List<StationLineDTO> stationLineDTOList= operationMapper.listStationLine();
+        List<RouteLineVO> routeLineVOList=new ArrayList<>(stationLineDTOList.size());
+        for(StationLineDTO stationLineDTO:stationLineDTOList){
+            RouteLineVO routeLineVO=new RouteLineVO();
+            List<Double> line = new ArrayList<>();
+            line.add(stationLineDTO.getStartLatitude());
+            line.add(stationLineDTO.getStartLongitude());
+            line.add(stationLineDTO.getEndLatitude());
+            line.add(stationLineDTO.getEndLongitude());
+            routeLineVO.setLine(line);
+            routeLineVOList.add(routeLineVO);
+        }
+        return routeLineVOList;
+    }
+    @Override
+    public List<PieItemVO<Date,Integer>> findDayRideCount(){
+        List<DayRideCountDTO> dayRideCountDTOList= operationMapper.listDayRideCount();
+        List<PieItemVO<Date,Integer>> pieItemVOList=new ArrayList<>(dayRideCountDTOList.size());
+        for(DayRideCountDTO dayRideCountDTO:dayRideCountDTOList){
+            PieItemVO<Date,Integer> pieItemVO = new PieItemVO<>();
+            pieItemVO.setName(dayRideCountDTO.getDate());
+            pieItemVO.setValue(dayRideCountDTO.getCount());
+            pieItemVOList.add(pieItemVO);
+        }
+        return pieItemVOList;
     }
 
 }

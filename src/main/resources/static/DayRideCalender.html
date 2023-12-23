@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>用户操作类型以及操作次数图</title>
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+    <script src="./js/jquery-1.11.0.min.js"></script>
+    <script src="./js/echarts.min.js"></script>
+
+</head>
+<body style="background-color: #2a2a2a; color: #ffffff;">
+<!-- 两个容器用于放置 ECharts 图表 -->
+<div id="main" style="width: 100%;height:700px;"></div>
+
+
+<script type="text/javascript">
+    /*服务器接口*/
+    var gdenerRideCountURL = "http://localhost:8080/nybike/operation/findDayRideCount";
+    //页面就绪事件
+    $(function () {
+        //    发送AJAX请求
+        $.get(gdenerRideCountURL,function (result) {
+            //    判断响应成功，然后解析结果数据
+            if(result.state == 1000){
+                var myChart = echarts.init(document.getElementById('main'));
+                // 转换数据格式
+                const graphData = result.data.map(item => [
+                    item.name.substring(0, 10), // 保留日期部分
+                    item.value
+                ]);
+                console.log(graphData);
+                const links = graphData.map(function (item, idx) {
+                    return {
+                        source: idx,
+                        target: idx + 1
+                    };
+                });
+                console.log(links);
+                links.pop();
+                option = {
+                    // 设置背景色为白色
+                    backgroundColor: '#ffffff',
+                    tooltip: {
+                        position: 'top'
+                    },
+                    visualMap: [
+                        {
+                            min: 1000,
+                            max: 2500,
+                            calculable: true,
+                            seriesIndex: [0, 1], // 保留右侧两个图表
+                            orient: 'horizontal',
+                            left: '20%',
+                            bottom:'20%'
+                        }
+                    ],
+                    calendar: [
+                        {
+                            orient: 'vertical',
+                            yearLabel: {
+                                margin: 40
+                            },
+                            monthLabel: {
+                                nameMap: 'cn',
+                                margin: 20
+                            },
+                            dayLabel: {
+                                firstDay: 1,
+                                nameMap: 'cn'
+                            },
+                            cellSize: 40,
+                            range: '2018-06',
+                            calendarIndex: 0, // 区分两个日历图
+                            left: '20%',  // 调整left值
+                            top:'30%'
+                        },
+                        {
+                            orient: 'vertical',
+                            yearLabel: {
+                                margin: 40
+                            },
+                            monthLabel: {
+                                nameMap: 'cn',
+                                margin: 20
+                            },
+                            dayLabel: {
+                                firstDay: 1,
+                                nameMap: 'cn'
+                            },
+                            cellSize: 40,
+                            left: '60%',  // 调整left值
+                            range: '2018-06',
+                            calendarIndex: 1, // 区分两个日历图
+                            top:'30%'
+                        }
+                    ],
+                    series: [
+                        {
+                            type: 'effectScatter',
+                            coordinateSystem: 'calendar',
+                            links: links,
+                            symbolSize: 10,
+                            calendarIndex: 0,
+                            data: graphData
+                        },
+                        {
+                            type: 'heatmap',
+                            coordinateSystem: 'calendar',
+                            data: graphData,
+                            calendarIndex: 0,
+                            left: '10%'  // 调整left值
+                        },
+                        {
+                            type: 'effectScatter',
+                            coordinateSystem: 'calendar',
+                            calendarIndex: 1,
+                            symbolSize: function (val) {
+                                return val[1] / 80;
+                            },
+                            data: graphData
+                        },
+                        {
+                            type: 'scatter',
+                            coordinateSystem: 'calendar',
+                            calendarIndex: 1,
+                            symbolSize: function (val) {
+                                return val[1] / 80;
+                            },
+                            data: graphData
+                        }
+                    ]
+                };
+                // 设置图表配置
+                myChart.setOption(option);
+
+                // 切换模式的函数
+
+            }else{
+                //    弹出异常信息
+                alert(result.msg)
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>

@@ -3,11 +3,9 @@ package edu.njnu.nybike;
 import edu.njnu.nybike.exception.EntityArgException;
 import edu.njnu.nybike.exception.InsertException;
 import edu.njnu.nybike.pojo.entity.Operation;
-import edu.njnu.nybike.pojo.vo.BarItemVO;
-import edu.njnu.nybike.pojo.vo.LineItemVO;
-import edu.njnu.nybike.pojo.vo.MapScatterVO;
-import edu.njnu.nybike.pojo.vo.PieItemVO;
+import edu.njnu.nybike.pojo.vo.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,5 +25,16 @@ public interface IOperationService {
      * @return 散点图所需要的对象集合
      */
     MapScatterVO findEndStationCount();
-
+    //查询每个性别的骑行数量
+    List<PieItemVO<String,Integer>> findGenderRideCount();
+    //查询每个性别的骑行的平均时长
+    List<PieItemVO<String,Integer>> findGenderRideAvg();
+    //查询会员年龄比
+    List<PieItemVO<Integer,Integer>> findSubscriberAge();
+    //查询非会员年龄比
+    List<PieItemVO<Integer,Integer>> findCustomerAge();
+    //查询所有线路经纬度
+    List<RouteLineVO> findStationLine();
+    //查询所有用户骑行次数
+    List<PieItemVO<Date,Integer>> findDayRideCount();
 }

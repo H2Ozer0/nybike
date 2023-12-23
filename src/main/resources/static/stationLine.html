@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 引入 echarts.js -->
+    <script src="./js/echarts.min.js"></script>
+    <script src="./js/bmap.js"></script>
+    <script src="./js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=r76uQnkTp3mNx9MSfWkQ5XG4ZO69w7Vd">
+    </script>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 100%;height:700px;"></div>
+
+<script type="text/javascript">
+    /* 服务器接口 */
+    var StationLineURL = "http://localhost:8080/nybike/operation/findStationLine";
+
+    // 页面就绪事件
+    $(function () {
+        // 发送AJAX请求
+        $.get(StationLineURL, function (result) {
+            // 判断响应成功，然后解析结果数据
+            if (result.state == 1000) {
+                var linesData = result.data;
+                console.log(linesData);
+
+                // 准备地图实例
+                var myChart = echarts.init(document.getElementById('main'));
+
+                // 处理数据以创建线路
+                var hStep = 300 / (linesData.length - 1);
+                var bikeLines = [].concat.apply([], linesData.map(function (line, idx) {
+                    if (line.length < 4) {
+                        // 数据不完整，不处理
+                        return null;
+                    }
+
+
+                    var startPt = [line.line[1], line.line[0]]; // 起始站点坐标
+                    var endPt = [line.line[3], line.line[2]];   // 终止站点坐标
+                    return {
+                        coords: [startPt, endPt],
+                        lineStyle: {
+                            normal: {
+                                color: echarts.color.modifyHSL('#5A94DF', Math.round(hStep * idx))
+                            }
+                        }
+                    };
+                }).filter(function (line) {
+                    // 移除空值
+                    return line !== null;
+                }));
+
+// 设置 ECharts 选项
+                myChart.setOption({
+                    bmap: {
+                        center:[linesData[0].line[1], linesData[0].line[0]],
+                        zoom: 12,
+                        roam: true,
+                        mapStyle: {
+                            styleJson: [
+                                {
+                                    featureType: 'water',
+                                    elementType: 'all',
+                                    stylers: {
+                                        color: '#031628'
+                                    }
+                                },
+                                {
+                                    featureType: 'land',
+                                    elementType: 'geometry',
+                                    stylers: {
+                                        color: '#000102'
+                                    }
+                                },
+                                {
+                                    featureType: 'highway',
+                                    elementType: 'all',
+                                    stylers: {
+                                        visibility: 'off'
+                                    }
+                                },
+                                {
+                                    featureType: 'arterial',
+                                    elementType: 'geometry.fill',
+                                    stylers: {
+                                        color: '#000000'
+                                    }
+                                },
+                                {
+                                    featureType: 'arterial',
+                                    elementType: 'geometry.stroke',
+                                    stylers: {
+                                        color: '#0b3d51'
+                                    }
+                                },
+                                {
+                                    featureType: 'local',
+                                    elementType: 'geometry',
+                                    stylers: {
+                                        color: '#000000'
+                                    }
+                                },
+                                {
+                                    featureType: 'railway',
+                                    elementType: 'geometry.fill',
+                                    stylers: {
+                                        color: '#000000'
+                                    }
+                                },
+                                {
+                                    featureType: 'railway',
+                                    elementType: 'geometry.stroke',
+                                    stylers: {
+                                        color: '#08304b'
+                                    }
+                                },
+                                {
+                                    featureType: 'subway',
+                                    elementType: 'geometry',
+                                    stylers: {
+                                        lightness: -70
+                                    }
+                                },
+                                {
+                                    featureType: 'building',
+                                    elementType: 'geometry.fill',
+                                    stylers: {
+                                        color: '#000000'
+                                    }
+                                },
+                                {
+                                    featureType: 'all',
+                                    elementType: 'labels.text.fill',
+                                    stylers: {
+                                        color: '#857f7f'
+                                    }
+                                },
+                                {
+                                    featureType: 'all',
+                                    elementType: 'labels.text.stroke',
+                                    stylers: {
+                                        color: '#000000'
+                                    }
+                                },
+                                {
+                                    featureType: 'building',
+                                    elementType: 'geometry',
+                                    stylers: {
+                                        color: '#022338'
+                                    }
+                                },
+                                {
+                                    featureType: 'green',
+                                    elementType: 'geometry',
+                                    stylers: {
+                                        color: '#062032'
+                                    }
+                                },
+                                {
+                                    featureType: 'boundary',
+                                    elementType: 'all',
+                                    stylers: {
+                                        color: '#465b6c'
+                                    }
+                                },
+                                {
+                                    featureType: 'manmade',
+                                    elementType: 'all',
+                                    stylers: {
+                                        color: '#022338'
+                                    }
+                                },
+                                {
+                                    featureType: 'label',
+                                    elementType: 'all',
+                                    stylers: {
+                                        visibility: 'off'
+                                    }
+                                }]
+
+                        }
+                    },
+                    series: [
+                        {
+                            type: 'lines',
+                            coordinateSystem: 'bmap',
+                            polyline: true,
+                            data: bikeLines,
+                            silent: true,
+                            lineStyle: {
+                                opacity: 0.1,
+                                width: 0.5
+                            },
+                            progressiveThreshold: 500,
+                            progressive: 200
+                        },
+                        {
+                            type: 'lines',
+                            coordinateSystem: 'bmap',
+                            polyline: true,
+                            data: bikeLines,
+                            lineStyle: {
+                                width: 0
+                            },
+                            effect: {
+                                constantSpeed: 20,
+                                show: true,
+                                trailLength: 0.1,
+                                symbolSize: 1.5
+                            },
+                            zlevel: 1
+                        }
+                    ]
+                });
+
+
+            } else {
+                // 弹出异常信息
+                alert(result.msg);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

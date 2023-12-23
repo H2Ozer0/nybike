@@ -1,8 +1,6 @@
 package edu.njnu.nybike.mapper;
 
-import edu.njnu.nybike.pojo.dto.DayHourCountDTO;
-import edu.njnu.nybike.pojo.dto.OptTypeCountDTO;
-import edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO;
+import edu.njnu.nybike.pojo.dto.*;
 import edu.njnu.nybike.pojo.entity.Operation;
 import edu.njnu.nybike.pojo.entity.StationInfo;
 import edu.njnu.nybike.pojo.vo.PieItemVO;
@@ -37,4 +35,17 @@ public interface OperationMapper{
      */
     List<PieItemVO<String,Integer>> listEndStationCount();
 //    StationInfo getGeoCoordByEndStationName(String endStationName);
+
+    //查询各性别骑行数量
+    List<GenderRideCountDTO> listGenderRideCount();
+    //查询各性别骑行平均时长
+    List<GenderRideAvgDTO> listGenderRideAvg();
+    //查询会员中各年龄人次
+    List<SubscriberAgeDTO> listSubscriberAge();
+    //查询游客中各年龄人次
+    List<CustomerAgeDTO> listCustomerAge();
+    //查询所有线路的经纬度
+    List<StationLineDTO> listStationLine();
+    //查询所有用户每天的骑行数量
+    List<DayRideCountDTO> listDayRideCount();
 }
