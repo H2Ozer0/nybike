@@ -53,5 +53,7 @@ public interface OperationMapper{
     List<dateCountDTO> listdateCountDTO();
     //统计每天各时段共享单车使用次数 动态柱状图
     List<dateCountplusDTO> listdateCountplus();
+    // 新添加的方法，用于查询每天每小时的骑行次数
+    List<DailyHourlyCountDTO> listDailyHourlyCount();
 
 }

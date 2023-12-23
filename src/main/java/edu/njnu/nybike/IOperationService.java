@@ -43,4 +43,6 @@ public interface IOperationService {
 
     List<BarDateplusVO<Map<LocalDate, List<Integer>>>> finddateCountplus();
 
+    LineItemVO getDailyHourlyCount();
+
 }

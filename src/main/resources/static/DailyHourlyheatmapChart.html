@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ECharts</title>
+  <script src="js/echarts.min.js"></script>
+  <script src="js/jquery-1.11.0.min.js"></script>
+</head>
+<body>
+<div id="heatmapChart" style="width: 800px; height: 600px;"></div>
+
+<script type="text/javascript">
+  var dayHourCountBaseUrl = "http://localhost:8080/nybike/operation/getDailyHourlyCount";
+
+  // 使用$.ajax获取数据
+  $.ajax({
+    type: 'GET',
+    url: dayHourCountBaseUrl,
+    success: function(response) {
+      if (response.state === 1000) {
+        // 数据请求成功
+        var data = response.data;
+        renderHeatmap(data.xdata, data.ydataMap);
+      } else {
+        console.log('Error fetching data:', response.msg);
+      }
+    },
+    error: function(error) {
+      console.log('Error fetching data:', error);
+    }
+  });
+
+  function renderHeatmap(xAxisData, yDataMap) {
+    // 使用ECharts绘制热力图
+    var chart = echarts.init(document.getElementById('heatmapChart'));
+
+    // 配置项
+    var option = {
+      title: {
+        text: '每天每小时的次数热力图'
+      },
+      tooltip: {
+        position: 'top'
+      },
+      animation: false,
+      grid: {
+        height: '50%',
+        y: '10%'
+      },
+      xAxis: {
+        type: 'category',
+        data: xAxisData,
+        splitArea: {
+          show: true
+        }
+      },
+      yAxis: {
+        type: 'category',
+        data: Object.keys(yDataMap),
+        splitArea: {
+          show: true
+        }
+      },
+      visualMap: {
+        min: 0,
+        max: 300, // You can adjust this based on your data
+        calculable: true,
+        orient: 'horizontal',
+        left: 'center',
+        bottom: '15%'
+      },
+      series: [{
+        name: '次数',
+        type: 'heatmap',
+        data: convertData(yDataMap),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表
+    chart.setOption(option);
+
+    function convertData(yDataMap) {
+      var data = [];
+      for (var key in yDataMap) {
+        if (yDataMap.hasOwnProperty(key)) {
+          var values = yDataMap[key];
+          for (var i = 0; i < values.length; i++) {
+            data.push([i, key, values[i]]);
+          }
+        }
+      }
+      return data;
+    }
+  }
+</script>
+</body>
+</html>

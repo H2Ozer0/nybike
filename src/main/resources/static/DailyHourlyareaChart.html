@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ECharts</title>
+  <script src="js/echarts.min.js"></script>
+  <script src="js/jquery-1.11.0.min.js"></script>
+</head>
+<body>
+<div id="areaChart" style="width: 800px; height: 600px;"></div>
+
+<script type="text/javascript">
+  var dayHourCountBaseUrl = "http://localhost:8080/nybike/operation/getDailyHourlyCount";
+
+  // 使用$.ajax获取数据
+  $.ajax({
+    type: 'GET',
+    url: dayHourCountBaseUrl,
+    success: function(response) {
+      if (response.state === 1000) {
+        // 数据请求成功
+        var data = response.data;
+        renderChart(data.xdata, data.ydataMap);
+      } else {
+        console.log('Error fetching data:', response.msg);
+      }
+    },
+    error: function(error) {
+      console.log('Error fetching data:', error);
+    }
+  });
+
+  function renderChart(xAxisData, yDataMap) {
+    // 使用ECharts绘制堆叠区域图
+    var chart = echarts.init(document.getElementById('areaChart'));
+
+    // 配置项
+    var option = {
+      title: {
+        text: '每天每小时的次数堆叠区域图'
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        }
+      },
+      legend: {
+        data: Object.keys(yDataMap)
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: xAxisData
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: []
+    };
+
+    // 填充y轴数据
+    for (var key in yDataMap) {
+      if (yDataMap.hasOwnProperty(key)) {
+        option.series.push({
+          name: key,
+          type: 'line',
+          stack: '总量',
+          areaStyle: {},
+          data: yDataMap[key]
+        });
+      }
+    }
+
+    // 使用刚指定的配置项和数据显示图表
+    chart.setOption(option);
+  }
+</script>
+</body>
+</html>

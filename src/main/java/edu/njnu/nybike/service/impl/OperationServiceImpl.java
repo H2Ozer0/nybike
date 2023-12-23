@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationServiceImpl  implements IOperationService {
@@ -361,7 +362,44 @@ public class OperationServiceImpl  implements IOperationService {
         return pieItemVOList;
     }
 
+    public LineItemVO getDailyHourlyCount() {
+        List<DailyHourlyCountDTO> dailyHourlyCountDTOList = operationMapper.listDailyHourlyCount();
+        LineItemVO lineItemVO = new LineItemVO();
+        Map<LocalDate, List<Integer>> yDataMap = new HashMap<>();
 
+        // 获取数据库中存在的日期
+        Set<LocalDate> availableDates = dailyHourlyCountDTOList.stream()
+                .map(DailyHourlyCountDTO::getDay)
+                .collect(Collectors.toSet());
+
+        // 循环遍历数据库中存在的日期
+        for (LocalDate date : availableDates) {
+            List<Integer> countList = new ArrayList<>();
+
+            // 遍历每个小时
+            for (int hour = 0; hour < 24; hour++) {
+                int count = 0;
+
+                // 在数据库中查找对应日期和小时的操作次数
+                for (DailyHourlyCountDTO dailyHourlyCountDTO : dailyHourlyCountDTOList) {
+                    if (dailyHourlyCountDTO.getDay().equals(date) && dailyHourlyCountDTO.getHour() == hour) {
+                        count = dailyHourlyCountDTO.getCount();
+                        break;
+                    }
+                }
+
+                countList.add(count);
+            }
+
+            yDataMap.put(date, countList);
+        }
+
+        lineItemVO.setYDataMap(yDataMap);
+        List<Integer> xData = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24));
+        lineItemVO.setXData(xData);
+
+        return lineItemVO;
+    }
 
 
 }

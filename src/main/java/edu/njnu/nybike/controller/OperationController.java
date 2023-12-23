@@ -97,5 +97,10 @@ public class OperationController {
         return JsonResult.getSuccessJR(barDateplusVOList);
     }
 
+    @GetMapping("/getDailyHourlyCount")
+    public JsonResult<LineItemVO> getDailyHourlyCount() {
+        LineItemVO lineItemVO = operationService.getDailyHourlyCount();
+        return JsonResult.getSuccessJR(lineItemVO);
+    }
 
 }

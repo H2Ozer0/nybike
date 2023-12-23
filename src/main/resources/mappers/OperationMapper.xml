@@ -234,9 +234,19 @@
             hour_counts
     </select>
 
-
-
-
+    <!-- 添加查询方法的 SQL 语句 -->
+    <select id="listDailyHourlyCount" resultType="edu.njnu.nybike.pojo.dto.DailyHourlyCountDTO">
+        SELECT
+            DATE_FORMAT(starttime, '%Y-%m-%d %H:00:00') AS day,
+    EXTRACT(HOUR FROM starttime) AS hour,
+    COUNT(*) AS count
+        FROM
+            nybikedb.trip_data
+        GROUP BY
+            day, hour
+        ORDER BY
+            day, hour;
+    </select>
 
 
 
