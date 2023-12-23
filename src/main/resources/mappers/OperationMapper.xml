@@ -10,21 +10,21 @@
     <!--通过#{对象属性名}的形式获取到传输的数据-->
     <insert id="insertOperation">
         insert into t_operation(
-          opt_type,station_id,status_level,
-          is_ebike_station,drag_start_lat,
-          drag_start_lon,drag_end_lat,
-          drag_end_lon,zoom_start_level,
-          zoom_end_level,icon_type,
-          user_ip,created_time
+            opt_type,station_id,status_level,
+            is_ebike_station,drag_start_lat,
+            drag_start_lon,drag_end_lat,
+            drag_end_lon,zoom_start_level,
+            zoom_end_level,icon_type,
+            user_ip,created_time
         )values (
-            #{optType},#{stationId},
-            #{statusLevel},#{isEbikeStation},
-            #{dragStartLat},#{dragStartLon},
-            #{dragEndLat},#{dragEndLon},
-            #{zoomStartLevel},#{zoomEndLevel},
-            #{iconType},#{userIp},
-            #{createdTime}
-        )
+                    #{optType},#{stationId},
+                    #{statusLevel},#{isEbikeStation},
+                    #{dragStartLat},#{dragStartLon},
+                    #{dragEndLat},#{dragEndLon},
+                    #{zoomStartLevel},#{zoomEndLevel},
+                    #{iconType},#{userIp},
+                    #{createdTime}
+                )
     </insert>
     <select id="listOptTypeCount"
             resultType="edu.njnu.nybike.pojo.dto.OptTypeCountDTO">
@@ -32,7 +32,7 @@
         from
             t_operation
         group by
-        opt_type
+            opt_type
     </select>
     <select id="listZoomEndLevelCount"
             resultType="edu.njnu.nybike.pojo.dto.ZoomEndLevelCountDTO">
@@ -47,19 +47,19 @@
 
     <select id="listDayHourCount" resultType="edu.njnu.nybike.pojo.dto.DayHourCountDTO">
         <![CDATA[
-            SELECT
-                DATE(created_time) AS day,
-                DATE_FORMAT(created_time, '%H') AS hour,
-                COUNT(*) AS count
-            FROM t_operation
-            WHERE created_time > DATE_SUB(CURDATE(), INTERVAL 2 DAY)
-              AND created_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
-            GROUP BY day, hour
-            ORDER BY day, hour;
-            ]]>
+        SELECT
+            DATE(created_time) AS day,
+            DATE_FORMAT(created_time, '%H') AS hour,
+            COUNT(*) AS count
+        FROM t_operation
+        WHERE created_time > DATE_SUB(CURDATE(), INTERVAL 2 DAY)
+          AND created_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+        GROUP BY day, hour
+        ORDER BY day, hour;
+        ]]>
     </select>
     <select id="getStationInfoById" resultType="edu.njnu.nybike.pojo.entity.StationInfo">
-            select * from t_station_info where id = #{sid}
+        select * from t_station_info where id = #{sid}
     </select>
     <select id="listStationInfoIds" resultType="java.lang.String">
         select id from t_station_info
@@ -72,7 +72,7 @@
             (#{stationInfo.id},#{stationInfo.name},#{stationInfo.lat},#{stationInfo.lon})
         </foreach>
     </insert>
-<!-- PieItemVO属性类型不确定，要手动指定，避免由于自动封装导致类型不匹配的问题   -->
+    <!-- PieItemVO属性类型不确定，要手动指定，避免由于自动封装导致类型不匹配的问题   -->
     <resultMap id="rm" type="edu.njnu.nybike.pojo.vo.PieItemVO">
         <result column="name" property="name" jdbcType="VARCHAR" javaType="string"></result>
         <result column="value" property="value" jdbcType="INTEGER" javaType="int"></result>
@@ -83,9 +83,9 @@
             t_station_info as tsi
             join
             (select
-                station_id,count(*) as value
+            station_id,count(*) as value
             from
-                t_operation
+            t_operation
             where opt_type=1
             group by station_id
             )tsv
@@ -98,50 +98,9 @@
         </foreach>
 
     </select>
-    <select id="listGenderRideCount"
-            resultType="edu.njnu.nybike.pojo.dto.GenderRideCountDTO">
-        select gender as genderType,ride_count as rideCount
-        from
-            gender_statistics
-    </select>
-    <select id="listGenderRideAvg"
-            resultType="edu.njnu.nybike.pojo.dto.GenderRideAvgDTO">
-        select gender as genderType,average_duration as rideAvg
-        from
-            gender_statistics
-    </select>
-    <select id="listSubscriberAge"
-            resultType="edu.njnu.nybike.pojo.dto.SubscriberAgeDTO">
-        select age_group as age,ride_count as count
-        from
-            age_group_data_subscriber
-    </select>
-    <select id="listCustomerAge"
-            resultType="edu.njnu.nybike.pojo.dto.CustomerAgeDTO">
-        select age_group as age,ride_count as count
-        from
-            age_group_data_customer
-    </select>
-    <select id="listStationLine"
-            resultType="edu.njnu.nybike.pojo.dto.StationLineDTO">
-        select start_latitude as startLatitude,start_longitude as startLongitude,end_latitude as endLatitude,end_longitude as endLongitude
-        from
-            route_data
-    </select>
-    <select id="listDayRideCount"
-            resultType="edu.njnu.nybike.pojo.dto.DayRideCountDTO">
-        SELECT
-            CAST(starttime AS DATE) AS date,
-    COUNT(*) AS count
-        FROM
-            trip_data
-        GROUP BY
-            date
-        ORDER BY
-            date;
-    </select>
-<!--    List<EndStationCountDTO> listEndStationCount();-->
-<!--    sql语句返回的结果集字段名和对象中的属性名一致-->
+
+    <!--    List<EndStationCountDTO> listEndStationCount();-->
+    <!--    sql语句返回的结果集字段名和对象中的属性名一致-->
 
     <select id="listEndStationCount"
             resultMap="rm">
@@ -214,26 +173,6 @@
             hour_counts
     </select>
 
-    <select id="listdateCountDTO"
-            resultType="edu.njnu.nybike.pojo.dto.dateCountDTO">
-        select
-            extracted_date as date,count_per_day as count
-        from
-            countdate
-    </select>
-
-    <select id="listdateCountplus"
-            resultType="edu.njnu.nybike.pojo.dto.dateCountplusDTO">
-        select
-            date as date, hour_0 as hour_0,hour_1 as hour_1,hour_2 as hour_2,hour_3 as hour_3,
-            hour_4 as hour_4,hour_5 as hour_5,hour_6 as hour_6,hour_7 as hour_7,hour_8 as hour_8,
-            hour_9 as hour_9,hour_10 as hour_10,hour_11 as hour_11,hour_12 as hour_12,hour_13 as hour_13,
-            hour_14 as hour_14,hour_15 as hour_15,hour_16 as hour_16,hour_17 as hour_17,hour_18 as hour_18,
-            hour_19 as hour_19,hour_20 as hour_20,hour_21 as hour_21,hour_22 as hour_22,hour_23 as hour_23
-        from
-            hour_counts
-    </select>
-
     <!-- 添加查询方法的 SQL 语句 -->
     <select id="listDailyHourlyCount" resultType="edu.njnu.nybike.pojo.dto.DailyHourlyCountDTO">
         SELECT
@@ -251,9 +190,4 @@
 
 
 </mapper>
-
-
-
-
-
 
