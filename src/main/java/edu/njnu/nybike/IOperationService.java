@@ -5,6 +5,7 @@ import edu.njnu.nybike.exception.InsertException;
 import edu.njnu.nybike.pojo.entity.Operation;
 import edu.njnu.nybike.pojo.vo.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,4 +38,9 @@ public interface IOperationService {
     List<RouteLineVO> findStationLine();
     //查询所有用户骑行次数
     List<PieItemVO<Date,Integer>> findDayRideCount();
+
+    List<BarDateVO<LocalDate,Integer>> finddateCount();
+
+    List<BarDateplusVO<Map<LocalDate, List<Integer>>>> finddateCountplus();
+
 }

@@ -104,6 +104,37 @@ public class OperationServiceImpl  implements IOperationService {
         return lineItemVO;
     }
 
+    public List<BarDateVO<LocalDate, Integer>> finddateCount(){
+        List<dateCountDTO> dateCountDTOList = operationMapper.listdateCountDTO();
+        List<BarDateVO<LocalDate, Integer>> barDateVOList =
+                new ArrayList<>(dateCountDTOList.size());
+        for (dateCountDTO dateCountDTO: dateCountDTOList){
+            BarDateVO<LocalDate,Integer> barDateVO = new BarDateVO<>();
+            barDateVO.setXData(dateCountDTO.getDate());
+            barDateVO.setYData(dateCountDTO.getCount());
+            barDateVOList.add(barDateVO);
+        }
+        return barDateVOList;
+    }
+
+    @Override
+    public List<BarDateplusVO<Map<LocalDate, List<Integer>>>> finddateCountplus(){
+        List<dateCountplusDTO> dateCountplusDTOList = operationMapper.listdateCountplus();
+        List<BarDateplusVO<Map<LocalDate, List<Integer>>>> barDateplusVOList =
+                new ArrayList<>(dateCountplusDTOList.size());
+
+        for (dateCountplusDTO dateCountplusDTO: dateCountplusDTOList){
+            dateCountplusDTO.getMap();
+            BarDateplusVO<Map<LocalDate, List<Integer>>> barDateplusVO = new BarDateplusVO<>();
+            Map<LocalDate, List<Integer>> hourcount=dateCountplusDTO.getHourcount();
+            barDateplusVO.setData(hourcount);
+            barDateplusVOList.add(barDateplusVO);
+            System.out.println(hourcount);
+        }
+        return barDateplusVOList;
+    }
+
+
     @Override
     public void saveOperation(Operation operation) throws InsertException, EntityArgException {
         if (operation == null) {
@@ -329,5 +360,8 @@ public class OperationServiceImpl  implements IOperationService {
         }
         return pieItemVOList;
     }
+
+
+
 
 }

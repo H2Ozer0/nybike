@@ -192,6 +192,54 @@
         ORDER BY
             date;
     </select>
+
+
+    <select id="listdateCountDTO"
+            resultType="edu.njnu.nybike.pojo.dto.dateCountDTO">
+        select
+            extracted_date as date,count_per_day as count
+        from
+            countdate
+    </select>
+
+    <select id="listdateCountplus"
+            resultType="edu.njnu.nybike.pojo.dto.dateCountplusDTO">
+        select
+            date as date, hour_0 as hour_0,hour_1 as hour_1,hour_2 as hour_2,hour_3 as hour_3,
+            hour_4 as hour_4,hour_5 as hour_5,hour_6 as hour_6,hour_7 as hour_7,hour_8 as hour_8,
+            hour_9 as hour_9,hour_10 as hour_10,hour_11 as hour_11,hour_12 as hour_12,hour_13 as hour_13,
+            hour_14 as hour_14,hour_15 as hour_15,hour_16 as hour_16,hour_17 as hour_17,hour_18 as hour_18,
+            hour_19 as hour_19,hour_20 as hour_20,hour_21 as hour_21,hour_22 as hour_22,hour_23 as hour_23
+        from
+            hour_counts
+    </select>
+
+    <select id="listdateCountDTO"
+            resultType="edu.njnu.nybike.pojo.dto.dateCountDTO">
+        select
+            extracted_date as date,count_per_day as count
+        from
+            countdate
+    </select>
+
+    <select id="listdateCountplus"
+            resultType="edu.njnu.nybike.pojo.dto.dateCountplusDTO">
+        select
+            date as date, hour_0 as hour_0,hour_1 as hour_1,hour_2 as hour_2,hour_3 as hour_3,
+            hour_4 as hour_4,hour_5 as hour_5,hour_6 as hour_6,hour_7 as hour_7,hour_8 as hour_8,
+            hour_9 as hour_9,hour_10 as hour_10,hour_11 as hour_11,hour_12 as hour_12,hour_13 as hour_13,
+            hour_14 as hour_14,hour_15 as hour_15,hour_16 as hour_16,hour_17 as hour_17,hour_18 as hour_18,
+            hour_19 as hour_19,hour_20 as hour_20,hour_21 as hour_21,hour_22 as hour_22,hour_23 as hour_23
+        from
+            hour_counts
+    </select>
+
+
+
+
+
+
+
 </mapper>
 
 

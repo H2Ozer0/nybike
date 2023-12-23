@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/operation")
@@ -81,4 +83,19 @@ public class OperationController {
         List<PieItemVO<Date,Integer>> pieItemVOList=operationService.findDayRideCount();
         return JsonResult.getSuccessJR(pieItemVOList);
     }
+    @GetMapping("/finddateCount")
+    public JsonResult<List<BarDateVO<LocalDate, Integer>>> finddateCount(){
+        List<BarDateVO<LocalDate, Integer>> barDateVOList =
+                operationService.finddateCount();
+        return JsonResult.getSuccessJR(barDateVOList);
+    }
+
+    @GetMapping("/finddateCountplus")
+    public JsonResult<List<BarDateplusVO<Map<LocalDate, List<Integer>>>>> finddateCountplus(){
+        List<BarDateplusVO<Map<LocalDate, List<Integer>>>> barDateplusVOList =
+                operationService.finddateCountplus();
+        return JsonResult.getSuccessJR(barDateplusVOList);
+    }
+
+
 }

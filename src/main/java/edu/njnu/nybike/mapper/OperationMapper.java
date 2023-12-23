@@ -48,4 +48,10 @@ public interface OperationMapper{
     List<StationLineDTO> listStationLine();
     //查询所有用户每天的骑行数量
     List<DayRideCountDTO> listDayRideCount();
+
+    //统计一个月每天共享单车使用次数
+    List<dateCountDTO> listdateCountDTO();
+    //统计每天各时段共享单车使用次数 动态柱状图
+    List<dateCountplusDTO> listdateCountplus();
+
 }

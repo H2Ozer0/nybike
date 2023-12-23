@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="./js/echarts.min.js"></script>
+    <!--引入jquery文件-->
+    <script src="./js/jquery-1.11.0.min.js"></script>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width:1800px; height:1100px;"></div>
+<script type="text/javascript">
+    // 服务器数据接口
+    var dateCountUrl="http://localhost:8080/nybike/operation/finddateCountplus";
+    // jquery提供的页面就绪事件API
+    $(function(){
+        //var myChart = echarts.init(document.getElementById('main'));
+        // 使用深色主题
+        var darkTheme = {
+            backgroundColor: '#1E1E1E',
+            textStyle: {
+                color: 'rgba(255, 255, 255, 0.9)'
+            }
+            // 其他主题配置...
+        };
+
+        // 初始化图表时传递深色主题
+        var myChart = echarts.init(document.getElementById('main'), darkTheme);
+        // 发送AJAX请求
+        $.get(dateCountUrl,function (result) {
+            // 解析得到的json数据
+            if(result.state==1000){ // 正常响应
+
+
+                var seriesData = result.data;
+                var data = [];
+                // 提取日期和对应的数字列表
+                var dates = [];
+                var numberLists = [];
+                var j = 0;
+                var currentTime = [];
+                var time;
+                for(var i = 0; i <= 24; i++ ){
+                        currentTime[i] = i;
+                }
+
+
+                //var colorArray = [];
+                var colorArray = [
+                    '#FFA07A', '#FFD700', '#98FB98', '#87CEFA', '#7B68EE',
+                    '#DDA0DD', '#8A2BE2', '#FFC0CB', '#F0FFF0', '#FFE4E1',
+                    '#FFEBCD', '#F4A460', '#D2691E', '#BC8F8F', '#778899',
+                    '#FAEBD7', '#FF6347', '#00FA9A', '#87CEEB', '#32CD32',
+                    '#FF4500', '#9400D3', '#48D1CC', '#1E90FF', '#4B0082',
+                    '#C71585', '#00FFFF', '#00FF7F', '#4682B4', '#8B4513'
+                ];
+
+// ... 其他配置
+
+
+                seriesData.forEach(function(item) {
+                    var date = Object.keys(item.data)[0];
+                    var numbers = item.data[date];
+                    dates.push(date);
+                    numberLists.push(numbers);
+
+                });
+                // 打印提取的日期和数字列表
+                console.log("Dates:", dates);
+                console.log("Number Lists:", numberLists);
+
+                for(var i = 0; i < dates.length;i++){
+                    data[i] = 0;
+                }
+                // 例：查找第一个日期对应的第一个数字
+                /*var firstDate = dates[0];
+                var firstNumber = numberLists[0][0];
+                console.log("First Date:", firstDate);
+                console.log("First Number in the List:", firstNumber);*/
+
+                option = {
+//Lightsalmon, 金, 淡绿色, 天蓝色, 深蓝色
+                    //color: colorArray,
+                    /*['#FFA07A', '#FFD700', '#98FB98', '#87CEFA', '#7B68EE', '#DDA0DD',
+                        '#8A2BE2', '#FFC0CB', '#F0FFF0', '#FFE4E1', '#FFEBCD', '#F4A460',
+                        '#D2691E', '#BC8F8F', '#778899', '#FAEBD7'],*/
+
+                    yAxis: {
+                        type: 'category',
+                        data: dates,
+                        inverse: true,
+                        animationDuration: 300,
+                        animationDurationUpdate: 300
+                    },
+                    xAxis: {
+                        max: 'dataMax'
+                    },
+                    series: [
+                        {
+                            realtimeSort: true,      // 实时排序，当数据更新时自动排序
+                            //name: dates,               // 系列的名称，通常用于图例
+                            type: 'bar',             // 指定系列的类型，这里是柱状图
+                            data: [],
+                            color: 'auto',
+                            label: {
+                                show: true,          // 是否显示标签
+                                position: 'right',   // 标签显示的位置，在柱状图的右侧
+                                valueAnimation: true // 是否开启值的动画显示
+                                /*formatter: function (params){
+                                    /!*!//在标签上显示当前时间
+                                    var currentTime = params.value[0] + ':00';
+                                    return currentTime;*!/
+                                }*/
+                            },
+                            // 为每个柱子指定颜色
+                            itemStyle: {
+                                color: function (params) {
+                                    return colorArray[params.dataIndex % colorArray.length];
+                                }
+                            },
+                        }
+                    ],
+
+                    title: {
+                        show: true,
+                        text: '时间：',
+                        testStyle: {
+                            color: '#FFFFFF',
+                            fontSize: 12
+                        },
+                        subtext: '',
+                        subtextStyle: {
+                            color: '#FFFFFF',
+                            fontSize: 20
+                        }
+                    },
+
+                    legend: {
+                        show: true,
+                        data: dates,
+                        backgroundColor: '#ccc',
+                        textStyle: {
+                            color: '#ccc'
+                            // ...
+                        }
+                    },
+                    animationDuration: 3000,
+                    animationDurationUpdate: 3000,
+                    animationEasing: 'linear',
+                    animationEasingUpdate: 'linear'
+                };
+
+
+                function update() {
+
+                    console.log('Updating...');
+                    console.log('Option:', option);
+
+                    // 检查 option.series[0].data 是否被正确初始化
+                    if (!option.series[0].data) {
+                        console.error('Data is not initialized!');
+                        return;
+                    }
+
+
+                    // 提取日期和对应的数字列表
+                    var dates = [];
+                    var numberLists = [];
+
+                    seriesData.forEach(function (item) {
+                        var date = Object.keys(item.data)[0];
+                        var numbers = item.data[date];
+
+                        dates.push(date);
+                        numberLists.push(numbers);
+                    });
+
+                    // 检查是否读取完所有的数值
+                    var allValuesRead = j > 23; // 这里假设每个日期有24个数值
+
+                    // 如果已经读取完所有数值，则停止更新
+                    if (allValuesRead) {
+                        stopUpdate();
+                        return;
+                    }
+
+                    //继续更新数据
+                    for (var i = 0; i < dates.length; i++) {
+                            data[i] = data[i] + numberLists[i][j];
+                    }
+                    time = currentTime[j];
+                    console.log(time);
+                    j++;
+
+
+                    option.series[0].data = data.slice();
+                    option.title.subtext = time + ':00';
+                    myChart.setOption(option, true);
+
+                }
+
+
+                // 定时执行 update 函数
+                updateInterval = setInterval(function() {
+                    update();
+                }, 3000);
+
+
+                // 停止更新的函数
+                function stopUpdate() {
+                    clearInterval(updateInterval);
+                    console.log('Updating stopped.');
+                }
+
+
+            }else{ // 异常响应
+                    // 弹出异常提示信息
+                    alert(result.msg);
+
+
+            }
+        });
+    });
+</script>
+</body>
+</html>

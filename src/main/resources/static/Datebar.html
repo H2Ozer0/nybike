@@ -10,62 +10,47 @@
 </head>
 <body>
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-<div id="main" style="width: 600px;height:400px;"></div>
+<div id="main" style="width:1200px; height:400px;"></div>
 <script type="text/javascript">
     // 服务器数据接口
-    var zoomEndLevelCountUrl="http://localhost:8080/nybike/operation/findZoomEndLevelCount";
+    var dateCountUrl="http://localhost:8080/nybike/operation/finddateCount";
     // jquery提供的页面就绪事件API
     $(function(){
         // 发送AJAX请求
-        $.get(zoomEndLevelCountUrl,function (result) {
+        $.get(dateCountUrl,function (result) {
             // 解析得到的json数据
             if(result.state==1000){ // 正常响应
-                var xData=result.data.xdata; // 获取后台返回的x轴数据
-                var yDataMap=result.data.ydataMap; // 获取后台返回的y轴数据的Map集合
-                var legendData=[]; // 保存图例数据
-                var seriesData=[]; // 保存所有y轴数据
-                //换了种写法
-                // for(var key in yDataMap){ // 遍历Map集合
-                //     legendData.push(key);
-                //     var yData={
-                //         name: key,
-                //         type: 'bar',
-                //         data: yDataMap[key]
-                //     };
-                //     seriesData.push(yData);
-                // }
-                var mapkey=[];
-                var mapData=[];
-                for(var key in yDataMap){
-                    mapkey.push(key);
-                    mapData.push(yDataMap[key]);
-                }
+                var data = result.data;
+                var xData= data.map(function(item,index){
+                    return index + 1;  //将日期数据映射成从1开始的数字
+                }); // 获取后台返回的x轴数据
+                var yData = data.map(function(item){
+                    return item.ydata;
+                });
 
-                var yData={
-                    name: "操作次数",
-                    type: 'bar',
-                    data: mapData
-                };
-                seriesData.push(yData);
                 // 基于准备好的dom，初始化echarts实例
                 var myChart = echarts.init(document.getElementById('main'));
                 // 指定图表的配置项和数据 var opts={}
-                option = {
-                    title: {
-                        text: '所有用户各个缩放级别的次数'
-                    },
-                    legend: {
-                        data:legendData
-                    },
-                    tooltip: {},
+                var option = {
                     xAxis: {
                         type: 'category',
-                        data: xData
+                        data: xData,
+                        axisTick:{  // 确保坐标刻度与标签对齐，避免部分刻度不显示的问题
+                            alignWithLabel: true
+                        },
+                        interval: 0 //设置为0，表示显示所有刻度
                     },
                     yAxis: {
                         type: 'value'
                     },
-                    series: seriesData
+                    series: [{
+                        type:'bar',
+                        data:yData,
+                        label:{
+                            show: true, //显示标签
+                            position: 'top' //标签位置，可以设置为'top','insidetop','inside', 'insideBottom', 'bottom'
+                        }
+                    }]
                 };
 
                 // 使用刚指定的配置项和数据显示图表。
@@ -74,9 +59,6 @@
                 // 弹出异常提示信息
                 alert(result.msg);
             }
-            //console.log(result);  // 输出获取的JSON数据
-            console.log(seriesData);    // 输出x轴数据
-            console.log(yDataMap); // 输出y轴数据的Map
         });
     });
 </script>
