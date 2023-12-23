@@ -9,6 +9,7 @@ import edu.njnu.nybike.pojo.vo.MapScatterVO;
 import edu.njnu.nybike.pojo.vo.PieItemVO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IOperationService {
 
@@ -20,4 +21,11 @@ public interface IOperationService {
     void addNewStationInfo();
     //查询站点名称，站点经纬度，站点访问次数，处理成相应格式，返回前端所需数据
     MapScatterVO findStationVisitCount();
+
+    /**
+     * 站点作为终点的次数
+     * @return 散点图所需要的对象集合
+     */
+    MapScatterVO findEndStationCount();
+
 }

@@ -98,4 +98,21 @@
         </foreach>
 
     </select>
+<!--    List<EndStationCountDTO> listEndStationCount();-->
+<!--    sql语句返回的结果集字段名和对象中的属性名一致-->
+
+    <select id="listEndStationCount"
+            resultMap="rm">
+        select
+            end_station_name as name,endstationcount as value
+        from
+            end_station
+    </select>
+
 </mapper>
+
+
+
+
+
+
